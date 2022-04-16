@@ -16,9 +16,19 @@
         <div class="about">
             <a href="/about">About</a>
         </div>
+        {% if 'user' in session %}
+        <div class="logout">
+            <a href="/logout">Logout</a>
+        </div>
+        {% else %}
+        <div class="login">
+            <a href="/login">Login</a>
+        </div>
         <div class="signup">
             <a href="/signup">Sign Up</a>
         </div>
+        {% endif %}
+
     </div>
 
      {% block heading %} 

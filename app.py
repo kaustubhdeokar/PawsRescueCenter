@@ -1,5 +1,5 @@
-from flask import Flask, render_template, abort, request
-from forms import LoginForm,SignUpForm
+from flask import Flask, render_template, abort, request, session
+from forms import LoginForm, SignUpForm
 
 app = Flask(__name__)
 
@@ -51,25 +51,36 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    fullname = form.fullname.data
     email = form.email.data
     password = form.password.data
-    cpassword = form.confirm.data
 
     if form.validate_on_submit():
         print('submitted and valid')
-        if email in users and users[email] == password and password == cpassword:
-            return render_template("login.html", message="successful login")
+        user = next((user for user in users if user["email"] == email and user["password"] == password))
+
+        if user is None:
+            return render_template("login.html", form=form, message="invalid users")
         else:
-            return render_template("login.html", message="invalid users")
+            session['user'] = user
+            return render_template("login.html", form=form, message="successful login")
+
     else:
         if request.method == "POST":
-            emailerror = form.email.errors[0]
-            passworderror = form.password.errors[0]
-            return render_template("login.html", form=form, emailerror=emailerror, passworderror=passworderror)
+            user = next((user for user in users if user["email"] == email and user["password"] == password))
+            if user is None:
+                return render_template("login.html", form=form, message="invalid users")
+            else:
+                session['user'] = user
+                return render_template("login.html", form=form, message="successful login")
 
     return render_template("login.html", form=form)
 
+
+@app.route("/logout")
+def logout():
+    if 'user' in session:
+        session.pop('user')
+    return hello()
 
 @app.route("/details/<int:id>")
 def details(id):

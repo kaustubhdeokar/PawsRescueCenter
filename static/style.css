@@ -15,11 +15,18 @@ th, td {
 }
 .navbar{
     display:flex;
+    float:right;
 }
 .home{
     margin:10px;
 }
 .about{
+    margin:10px;
+}
+.login{
+    margin:10px;
+}
+.logout{
     margin:10px;
 }
 .signup{
