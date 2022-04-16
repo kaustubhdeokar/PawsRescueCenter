@@ -13,3 +13,16 @@ th, td {
     border-top: 1px solid #ddd;
 
 }
+.navbar{
+    display:flex;
+}
+.home{
+    margin:10px;
+}
+.about{
+    margin:10px;
+}
+.signup{
+    margin:10px;
+    
+}

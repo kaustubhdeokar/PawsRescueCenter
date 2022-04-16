@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+{% endblock %}
+
+
+{% block content %}
+
+{% if message %}
+  {{message}}
+{% else %}
+
+<h1 id="title">Login Page</h1>
+
+<form action="{{url_for('login')}}" method="POST">
+  <br>
+  {{form.email.label}}:<br><br>
+  {{form.email}}
+  {% if emailerror %}
+  {{ emailerror }}
+  {% endif %}
+  <br>
+  <br>
+  {{form.password.label}}:<br><br>
+  {{form.password}}
+  <br>
+  <br>
+  {{form.csrf_token }}
+  {{form.submit}}
+
+</form> 
+<hr>
+{% endif %}
+
+{% endblock %}

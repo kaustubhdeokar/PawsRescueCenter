@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+    {% block head %}
+    <title>Details</title>
+    {% endblock %}
+
+    {% block heading %}
+    <h1 id="title">Details Pet. </h1>
+    {% endblock %}
+
+    {% block content %}
+
+
+        <div class="container" style="display:flex">
+
+            <div class="left">
+                <img src="{{url_for('static',filename=pets['id']|string+'.jpg')}}" alt="pic" height="450px" width="450px">
+            </div>
+
+            <div class="right" style="margin-left:20px;">
+                <h1>{{pets['name']}}</h1>
+                <p> <b>Age:</b> {{pets['age']}} </p>
+                <p> <b>Bio:</b> {{pets['bio']}} </p>
+            </div>
+
+        </div>
+
+
+    {% endblock %}

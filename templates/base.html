@@ -2,15 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {% block head %}    {% endblock %}
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}"/>
+    {% block head %}   
 
+    {% endblock %}
 </head>
 <body>
-     {% block heading %} {% endblock %}
-     <div id="content">
-         {% block content %}
+    
+    <div class="navbar">
+        <div class="home">
+            <a href="/">Home</a>
+        </div>
+        <div class="about">
+            <a href="/about">About</a>
+        </div>
+        <div class="signup">
+            <a href="/signup">Sign Up</a>
+        </div>
+    </div>
 
-         {% endblock %}
-     </div>
+     {% block heading %} 
+     {% endblock %}
+     
+     {% block content %}
+     {% endblock %}
+     
+    <div id="footer">
+        {% block footer %}
+        {% endblock %}
+    </div>
 </body>
 </html>
