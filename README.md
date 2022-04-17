@@ -8,7 +8,7 @@ A site where users can get information of the rescued pets.
 A user can 
   - sign up.
   - login. 
-  - view details for any pet which are already added. 
+  - View/edit/delete details for any pets that are already added.
   - Edit details for the pets added by him. 
 
 
