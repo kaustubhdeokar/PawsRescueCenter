@@ -17,3 +17,11 @@ class SignUpForm(FlaskForm):
                              validators=[InputRequired(), EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Confirm Password', validators=[InputRequired()])
     submit = SubmitField('Sign Up')
+
+
+class PetEditForm(FlaskForm):
+    name = StringField('Pet\'s Name')
+    age = StringField('Pet\'s Age')
+    bio = StringField('Pet\'s Bio')
+    delete = SubmitField('Delete')
+    submit = SubmitField('Edit')

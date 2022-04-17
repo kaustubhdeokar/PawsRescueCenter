@@ -1,30 +1,50 @@
 {% extends "base.html" %}
 
 
-    {% block head %}
-    <title>Details</title>
-    {% endblock %}
+{% block head %}
+<title>Pet Details</title>
+{% endblock %}
 
-    {% block heading %}
-    <h1 id="title">Details Pet. </h1>
-    {% endblock %}
+{% block heading %}
+<h1 id="title">Pet Bio</h1>
+{% endblock %}
 
-    {% block content %}
+{% block content %}
 
 
-        <div class="container" style="display:flex">
+<div class="container" style="display:flex">
 
-            <div class="left">
-                <img src="{{url_for('static',filename=pets['id']|string+'.jpg')}}" alt="pic" height="450px" width="450px">
-            </div>
+    <div class="left">
+        <img src="{{url_for('static',filename=pets.id|string+'.jpg')}}" alt="pic" height="450px" width="450px">
+        <button style="background-color:tomato" onclick="location.href='{{url_for('delete', id = pets.id)}}'"> Delete Pet </button>
+    </div>
 
-            <div class="right" style="margin-left:20px;">
-                <h1>{{pets['name']}}</h1>
-                <p> <b>Age:</b> {{pets['age']}} </p>
-                <p> <b>Bio:</b> {{pets['bio']}} </p>
-            </div>
+    <div class="right" style="margin-left:20px;">
+        <h1>{{pets.name}}</h1>
+        <p><b>Age:</b> {{pets.age}} </p>
+        <p><b>Bio:</b> {{pets.bio}} </p>
 
+        <div>
+            <form action="{{url_for('details', id=pets.id )}}" method="POST">
+                <br>
+                {{form.name.label}}<br>
+                {{form.name}}
+                <br><br>
+                {{form.age.label}}<br>
+                {{ form.age }}
+                <br><br>
+                {{form.bio.label}}<br>
+                {{ form.bio }}
+                <br><br>
+                {{form.submit.label}}<br>
+                {{ form.submit }}
+                <br><br>
+            </form>
         </div>
 
+    </div>
 
-    {% endblock %}
+</div>
+
+
+{% endblock %}

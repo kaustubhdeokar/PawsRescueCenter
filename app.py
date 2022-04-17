@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, abort, request, session
-from forms import LoginForm, SignUpForm
+from forms import LoginForm, SignUpForm, PetEditForm
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -29,7 +29,6 @@ class User(db.Model):
     email = db.Column(db.String, unique=True)
     password = db.Column(db.String)
     pets = db.relationship('Pet', backref='user')
-
 
 
 # """Information regarding the Pets in the System."""
@@ -115,15 +114,37 @@ def logout():
     return hello()
 
 
-@app.route("/details/<int:id>")
+@app.route("/details/<int:id>", methods=["GET", "POST"])
 def details(id):
     """ details about specific pet"""
-    pets = Pet.query.all()
+    pet = Pet.query.filter_by(id=id).first()
+    form = PetEditForm()
     try:
-        if pets[id - 1] is None:
+        if pet is None:
             abort(404, description="No Pet was Found with the given ID")
         else:
-            return render_template("details.html", pets=pets[id - 1])
+            if request.method == "POST":
+                name = form.name.data
+                age = form.age.data
+                bio = form.bio.data
+                pet.name, pet.age, pet.bio = name, age, bio
+                db.session.commit()
+            return render_template("details.html", pets=pet, form=form)
+    except Exception as e:
+        abort(404, description="No Pet was Found with the given ID")
+
+
+@app.route("/delete/<int:id>", methods=["GET","POST"])
+def delete(id):
+    """ details about specific pet"""
+    pet = Pet.query.filter_by(id=id).first()
+    try:
+        if pet is None:
+            abort(404, description="No Pet was Found with the given ID")
+        else:
+            db.session.delete(pet)
+            db.session.commit()
+            return hello()
     except Exception as e:
         abort(404, description="No Pet was Found with the given ID")
 
