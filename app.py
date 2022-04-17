@@ -6,27 +6,21 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 
 """Information regarding the Pets in the System."""
-pets = [
-    {"id": 1, "name": "Nelly", "age": "5 weeks",
-     "bio": "I am a tiny kitten rescued by the good people at Paws Rescue Center. I love squeaky toys and cuddles."},
-    {"id": 2, "name": "Yuki", "age": "8 months", "bio": "I am a handsome gentle-cat. I like to dress up in bow ties."},
-    {"id": 3, "name": "Basker", "age": "1 year", "bio": "I love barking. But, I love my friends more."},
-    {"id": 4, "name": "Mr. Furrkins", "age": "5 years", "bio": "Probably napping."},
-]
-
-users = [{"id": 1, "full_name": "Pet Rescue Team", "email": "team@pawsrescue.co", "password": "adminpass"}]
 
 
 class Pet(db.Model):
-    id = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
-    age = db.Column(db.Integer, nullable=False)
-    bio = db.Column(db.String(50))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+    age = db.Column(db.String)
+    bio = db.Column(db.String)
     posted_by = db.Column(db.String, db.ForeignKey('user.id'))
+
+
+"""Model for Users."""
 
 
 class User(db.Model):
@@ -37,9 +31,21 @@ class User(db.Model):
     pets = db.relationship('Pet', backref='user')
 
 
+
+# """Information regarding the Pets in the System."""
+# pets = [
+#     {"id": 1, "name": "Nelly", "age": "5 weeks",
+#      "bio": "I am a tiny kitten rescued by the good people at Paws Rescue Center. I love squeaky toys and cuddles."},
+#     {"id": 2, "name": "Yuki", "age": "8 months", "bio": "I am a handsome gentle-cat. I like to dress up in bow ties."},
+#     {"id": 3, "name": "Basker", "age": "1 year", "bio": "I love barking. But, I love my friends more."},
+#     {"id": 4, "name": "Mr. Furrkins", "age": "5 years", "bio": "Probably napping."},
+# ]
+
+
 @app.route("/")
 def hello():
     """ Home page. """
+    pets = Pet.query.all()
     return render_template("home.html", pets=pets)
 
 
@@ -56,7 +62,7 @@ def signup():
     fullname = form.fullname.data
     email = form.email.data
     password = form.password.data
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email, password=password).first()
     if user is not None:
         return render_template(signup_template, message="The email already exists!, please login")
     else:
@@ -82,21 +88,21 @@ def login():
 
     if form.validate_on_submit():
         print('submitted and valid')
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email, password=password).first()
 
         if user is None:
             return render_template("login.html", form=form, message="invalid users")
         else:
-            session['user'] = user
+            session['id'] = user.id
             return render_template("login.html", form=form, message="successful login")
 
     else:
         if request.method == "POST":
-            user = User.query.filter_by(email=email).first()
+            user = User.query.filter_by(email=email, password=password).first()
             if user is None:
                 return render_template("login.html", form=form, message="invalid users")
             else:
-                session['user'] = user
+                session['id'] = user.id
                 return render_template("login.html", form=form, message="successful login")
 
     return render_template("login.html", form=form)
@@ -104,14 +110,15 @@ def login():
 
 @app.route("/logout")
 def logout():
-    if 'user' in session:
-        session.pop('user')
+    if 'id' in session:
+        session.pop('id')
     return hello()
 
 
 @app.route("/details/<int:id>")
 def details(id):
     """ details about specific pet"""
+    pets = Pet.query.all()
     try:
         if pets[id - 1] is None:
             abort(404, description="No Pet was Found with the given ID")
