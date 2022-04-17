@@ -1,12 +1,13 @@
+import os
 from flask import Flask, render_template, abort, request, session
 from forms import LoginForm, SignUpForm
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
-import os
-
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///example.db'
+db = SQLAlchemy(app)
 
 """Information regarding the Pets in the System."""
 pets = [
@@ -18,6 +19,22 @@ pets = [
 ]
 
 users = [{"id": 1, "full_name": "Pet Rescue Team", "email": "team@pawsrescue.co", "password": "adminpass"}]
+
+
+class Pet(db.Model):
+    id = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    age = db.Column(db.Integer, nullable=False)
+    bio = db.Column(db.String(50))
+    posted_by = db.Column(db.String, db.ForeignKey('user.id'))
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
+    password = db.Column(db.String)
+    pets = db.relationship('Pet', backref='user')
 
 
 @app.route("/")
@@ -34,18 +51,27 @@ def about():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+    signup_template = "signup.html"
     form = SignUpForm()
     fullname = form.fullname.data
     email = form.email.data
     password = form.password.data
-
-    if form.validate_on_submit():
-        print('submitted and valid')
-        new_user = {"id": len(users) + 1, "full_name": fullname, "email": email, "password": password}
-        users.append(new_user)
-        return render_template("signup.html", message="successful login")
+    user = User.query.filter_by(email=email).first()
+    if user is not None:
+        return render_template(signup_template, message="The email already exists!, please login")
     else:
-        return render_template("signup.html", form=form)
+        if form.validate_on_submit():
+            print('submitted and valid')
+            new_user = User(full_name=fullname, email=email, password=password)
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+            print(User.query.all())
+            return render_template(signup_template, message="User created")
+        else:
+            return render_template(signup_template, form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -56,7 +82,7 @@ def login():
 
     if form.validate_on_submit():
         print('submitted and valid')
-        user = next((user for user in users if user["email"] == email and user["password"] == password))
+        user = User.query.filter_by(email=email).first()
 
         if user is None:
             return render_template("login.html", form=form, message="invalid users")
@@ -66,7 +92,7 @@ def login():
 
     else:
         if request.method == "POST":
-            user = next((user for user in users if user["email"] == email and user["password"] == password))
+            user = User.query.filter_by(email=email).first()
             if user is None:
                 return render_template("login.html", form=form, message="invalid users")
             else:
@@ -81,6 +107,7 @@ def logout():
     if 'user' in session:
         session.pop('user')
     return hello()
+
 
 @app.route("/details/<int:id>")
 def details(id):
